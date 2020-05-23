@@ -35,7 +35,7 @@ async function waitForTimeout(url, timeout) {
 
     await Promise.race([
       waitForUrl(url),
-      waitForTimeout(url, +core.getInput("site_name") || 60),
+      waitForTimeout(url, +core.getInput("max_timeout") || 60),
     ])
   } catch (err) {
     core.setFailed(err.message)
