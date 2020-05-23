@@ -1,10 +1,8 @@
-# Wait for Netlify Deploy — A GitHub Action ⏱
+# Wait for Netlify Action ⏱
 
-Do you have other Github actions (Lighthouse, Cypress, etc) that depend on the Netlify Preview URL? This action will wait until the url is available before running the next task.
+> GitHub Action to wait for a Netlify Preview Deployment.
 
-This is a fork of [JakePartusch/wait-for-netlify-action](https://github.com/JakePartusch/wait-for-netlify-action) that uses the deployment for the commit, rather than for the PR.
-
-## Inputs
+## Options
 
 ### `site_name`
 
@@ -20,56 +18,28 @@ Optional — The amount of time to spend waiting on Netlify. Defaults to `60` se
 
 The netlify deploy preview url that was deployed.
 
-## Example usage
+## Usage
 
-Basic Usage
+Basic:
 
 ```yaml
 steps:
-  - name: Waiting for Netlify Preview
-    uses: josephduffy/wait-for-netlify-action@v1
-    id: wait-for-netflify-preview
+  - name: Wait for Netlify Deploy
+    uses: mskelton/wait-for-netlify-action@v1
     with:
-      site_name: "YOUR_SITE_NAME"
-      max_timeout: 60
+      site_name: YOUR_SITE_NAME
 ```
 
-<details>
-<summary>Complete example with Lighthouse</summary>
-<br />
+Use the deploy url in another step:
 
 ```yaml
-name: Lighthouse
-
-on: [pull_request]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Use Node.js 12.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: 12.x
-      - name: Install
-        run: |
-          npm ci
-      - name: Build
-        run: |
-          npm run build
-      - name: Waiting for 200 from the Netlify Preview
-        uses: josephduffy/wait-for-netlify-action@v1
-        id: wait-for-netflify-preview
-        with:
-          site_name: "YOUR_SITE_NAME"
-      - name: Lighthouse CI
-        run: |
-          npm install -g @lhci/cli@0.3.x
-          lhci autorun --upload.target=temporary-public-storage --collect.url=${{ steps.wait-for-netflify-preview.outputs.url }} || echo "LHCI failed!"
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+steps:
+  - name: Waiting for Netlify deploy
+    uses: mskelton/wait-for-netlify-action@v1
+    id: wait-for-netflify
+    with:
+      site_name: YOUR_SITE_NAME
+  - run: npm test
+    env:
+      DEPLOY_URL: ${{ steps.wait-for-netflify.outputs.url }}
 ```
-
-</details>

@@ -1,17 +1,20 @@
 {
   "name": "wait-for-netlify-action",
   "version": "1.0.0",
-  "description": "",
+  "description": "Wait for Netlify Deploy Preview to complete for a commit.",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "keywords": [
+    "netlify"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mskelton/wait-for-netlify-action.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Mark Skelton",
+  "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.2.0",
-    "@actions/github": "^2.0.0",
-    "axios": "^0.19.0"
+    "@actions/core": "^1.2.4",
+    "@actions/github": "^2.2.0",
+    "axios": "^0.19.2"
   }
 }

@@ -1,36 +1,43 @@
-const core = require("@actions/core");
-const github = require("@actions/github");
-const axios = require("axios");
+const core = require("@actions/core")
+const github = require("@actions/github")
+const axios = require("axios")
 
-const waitForUrl = async (url, MAX_TIMEOUT) => {
-  const iterations = MAX_TIMEOUT / 2;
-  for (let i = 0; i < iterations; i++) {
+const sleep = (seconds) =>
+  new Promise((resolve) => setTimeout(resolve, seconds * 1000))
+
+async function waitForUrl(url) {
+  while (true) {
     try {
-      await axios.get(url);
-      return;
+      await axios.get(url)
+      return
     } catch (e) {
-      console.log("Url unavailable, retrying...");
-      await new Promise(r => setTimeout(r, 2000));
+      console.log("Url unavailable, retrying...")
+      await sleep(2)
     }
   }
-  core.setFailed(`Timeout reached: Unable to connect to ${url}`);
-};
+}
 
-const run = async () => {
+async function waitForTimeout(url, timeout) {
+  await sleep(timeout)
+  throw new Error(`Timeout reached: Unable to connect to ${url}`)
+}
+
+;(async () => {
   try {
-    const commit = github.context.payload.head;
-    const MAX_TIMEOUT = Number(core.getInput("site_name")) || 60;
-    const siteName = core.getInput("site_name");
-    if (!siteName) {
-      core.setFailed("Required field `site_name` was not provided");
-    }
-    const url = `https://${commit}--${siteName}.netlify.com`;
-    core.setOutput("url", url);
-    console.log(`Waiting for a 200 from: ${url}`);
-    await waitForUrl(url, MAX_TIMEOUT);
-  } catch (error) {
-    core.setFailed(error.message);
-  }
-};
+    console.log(github.context.payload)
 
-run();
+    const commit = github.context.payload.head
+    const siteName = core.getInput("site_name", { required: true })
+
+    const url = `https://${commit}--${siteName}.netlify.com`
+    console.log(`Waiting for a 200 from: ${url}`)
+    core.setOutput("url", url)
+
+    await Promise.race([
+      waitForUrl(url),
+      waitForTimeout(url, +core.getInput("site_name") || 60),
+    ])
+  } catch (err) {
+    core.setFailed(err.message)
+  }
+})()
